@@ -44,6 +44,7 @@ class ProductController extends Controller
             'productname' => 'required|string|max:255',
             'description' => 'nullable|string',
             'productprice' => 'required|integer|min:0',
+            'productquantity' => 'required|integer|min:1',
             'category_id' => 'required|exists:categories,id',
         ]);
 
@@ -105,10 +106,14 @@ class ProductController extends Controller
             'productname' => 'required|string|max:255',
             'description' => 'required|string',
             'productprice' => 'required|numeric',
+            'productquantity' => 'required|numeric|min:1',
             'category_id' => 'required|exists:categories,id',
         ]);
 
         $validated['status'] = 'waiting';
+        $validated['is_available'] = true;
+
+        // $isAvailable = $validated['productquantity'] > 0;
 
         $product->update($validated);
 

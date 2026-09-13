@@ -33,6 +33,7 @@
                             <th class="py-3.5 px-5">Product</th>
                             <th class="py-3.5 px-5">Category</th>
                             <th class="py-3.5 px-5 text-right">Price</th>
+                            <th class="py-3.5 px-5 text-center">Stock</th>
                             <th class="py-3.5 px-5 text-center">Status</th>
                             <th class="py-3.5 px-5 text-right">Actions</th>
                         </tr>
@@ -49,6 +50,15 @@
                                 </td>
                                 <td class="py-4 px-5 text-right font-semibold text-gray-900">
                                     &#8358;{{ number_format($product->productprice) }}
+                                </td>
+                                <td class="py-4 px-5 text-center font-semibold text-xs">
+                                    @if(($product->productquantity ?? 0) > 0)
+                                        <span class="text-gray-900">{{ $product->productquantity }} left</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 uppercase">
+                                            Out of Stock
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="py-4 px-5 text-center">
                                     @if(($product->status ?? 'waiting') === 'approved')

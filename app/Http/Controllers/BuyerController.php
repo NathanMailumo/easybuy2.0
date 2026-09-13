@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Products;
-// use App\Models\Products;
 use App\Models\Category;
 use App\Models\cart;
+use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 
 class BuyerController extends Controller
@@ -49,9 +49,14 @@ class BuyerController extends Controller
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $buyer = Auth::user();
-
         $product = Products::findOrFail($request->product_id);
+
+        // Safeguard check for available inventory stock
+        if ($product->productquantity <= 0) {
+            return back()->with('error', 'This product is currently out of stock.');
+        }
+
+        $buyer = Auth::user();
 
         $cartItem = cart::where('buyer_id', $buyer->id)
                         ->where('product_id', $product->id)
@@ -67,6 +72,7 @@ class BuyerController extends Controller
                 'quantity' => $request->quantity,
             ]);
         }
+
         return back()
             ->with('success', 'Product added to cart.')
             ->with('added_product_id', $product->id);
@@ -105,38 +111,19 @@ class BuyerController extends Controller
 
     public function showOrder()
     {
-        $completedPayment = session('completed_payment');
+        $order = Order::where('user_id', Auth::id())
+            ->where('payment_status', 'paid')
+            ->with('items.product')
+            ->latest()
+            ->first();
 
-        if ($completedPayment) {
-            return view('buyer.order', [
-                'cartItems' => collect($completedPayment['cart_items'])->map(function ($item) {
-                    return (object) [
-                        'quantity' => $item['quantity'],
-                        'products' => (object) [
-                            'productname' => $item['productname'],
-                            'description' => $item['description'],
-                            'productprice' => $item['unit_price'],
-                        ],
-                    ];
-                }),
-                'subtotal' => $completedPayment['subtotal'],
-                'total' => $completedPayment['total'],
-                'estimatedDate' => now()->addDays(4)->format('l, F j, Y'),
-                'receipt' => $completedPayment,
-            ]);
+        if (!$order) {
+            return redirect()->route('buyer.buyerdash')->with('error', 'No order record found.');
         }
 
-        $cartItems = cart::where('buyer_id', Auth::id())->with('products.category')->get();
+        $estimatedDate = $order->created_at->addDays(4)->format('l, F j, Y');
 
-        $subtotal = 0;
-        foreach ($cartItems as $item) {
-            $subtotal += ($item->products->productprice ?? 0) * $item->quantity;
-        }
-
-        $total = $subtotal;
-        $estimatedDate = now()->addDays(4)->format('l, F j, Y');
-
-        return view('buyer.order', compact('cartItems', 'subtotal', 'total', 'estimatedDate'));
+        return view('buyer.order', compact('order', 'estimatedDate'));
     }
 
     public function showCheckout()
@@ -149,8 +136,6 @@ class BuyerController extends Controller
         }
         $total = $subtotal;
 
-
         return view('buyer.checkout', compact('cartItems', 'subtotal', 'total'));
     }
 }
-

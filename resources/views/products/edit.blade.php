@@ -80,6 +80,19 @@
                         <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">
+                        Item Quantity (&#8358;)
+                    </label>
+                    <input type="number" 
+                           name="productquantity" 
+                           value="{{ old('productquantity', $product->productquantity) }}"
+                           required
+                           class="w-full bg-[#faf9f6] border border-gray-300 rounded-sm px-3.5 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-black transition">
+                    @error('productprice')
+                        <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span>
+                    @enderror
+                </div>
 
                 <button type="submit" 
                         class="w-full py-3 bg-[#f5ce42] hover:bg-[#e6c035] text-black font-semibold text-xs uppercase tracking-widest rounded-sm transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-4">

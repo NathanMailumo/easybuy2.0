@@ -16,15 +16,15 @@
 
         // High quality ecommerce product images
         $catalogImages = [
-            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', // Air Boost Red/White Sneaker
-            'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?auto=format&fit=crop&w=800&q=80', // Classic White Hi-Top
-            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80', // Linen V-Neck Top
-            'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80', // Oversized Flannel Shirt
-            'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80', // Retro Round Sunglasses
-            'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80', // Minimalist Watch
-            'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80', // Gold Jewelry Set
-            'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80', // Luxury Fragrance / Cologne
-            'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80', // Leather Bag
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
         ];
 
         $badges = ['New', 'Popular', 'Sale'];
@@ -40,8 +40,15 @@
                     <span>{{ session('success') }}</span>
                 </div>
                 <a href="{{ route('buyer.cart') }}" class="text-xs font-bold uppercase tracking-wider text-emerald-900 hover:underline flex items-center gap-1">
-                    <span>View Bag</span> &rarr;
+                    <span>View Cart </span> &rarr;
                 </a>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-8 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
+                <span class="text-sm font-medium">{{ session('error') }}</span>
             </div>
         @endif
 
@@ -58,13 +65,11 @@
         <!-- Filter Pills Bar -->
         <div class="flex items-center justify-between gap-4 pb-6 mb-8 overflow-x-auto border-b border-gray-200 scrollbar-none">
             <div class="flex items-center gap-2.5 flex-nowrap">
-                <!-- All Filter Pill -->
                 <a href="{{ route('buyer.browse') }}" 
                    class="px-5 py-2 text-sm font-medium rounded-full transition whitespace-nowrap {{ !$selectedCategory ? 'bg-[#111111] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black' }}">
                     All
                 </a>
 
-                <!-- Database Categories Pills -->
                 @foreach($categories as $cat)
                     <a href="{{ route('buyer.browse', ['category' => $cat->id]) }}" 
                        class="px-5 py-2 text-sm font-medium rounded-full transition whitespace-nowrap {{ $selectedCategory && $selectedCategory->id === $cat->id ? 'bg-[#111111] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:border-black' }}">
@@ -87,7 +92,7 @@
             </form>
         </div>
 
-        <!-- 3-Column Products Grid (Matching Image 1) -->
+        <!-- 3-Column Products Grid -->
         @if($displayProducts->isNotEmpty())
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($displayProducts as $product)
@@ -101,7 +106,6 @@
                         <div>
                             <!-- Product Image Area -->
                             <div class="relative bg-[#f4f4f4] aspect-square overflow-hidden flex items-center justify-center p-6">
-                                <!-- Badge (New / Popular / Sale) in Top-Left -->
                                 <span class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm border border-gray-200/60 text-gray-700 text-[11px] font-medium px-3 py-1 rounded-sm shadow-sm">
                                     {{ $badgeText }}
                                 </span>
@@ -113,7 +117,6 @@
 
                             <!-- Product Info -->
                             <div class="p-5 pb-2">
-                                <!-- Row 1: Title & Price -->
                                 <div class="flex items-start justify-between gap-2">
                                     <h3 class="text-base font-bold text-gray-900 tracking-tight line-clamp-1">
                                         {{ $product->productname }}
@@ -123,16 +126,14 @@
                                     </span>
                                 </div>
 
-                                <!-- Row 2: Subtitle / Description (Italic) -->
                                 <p class="text-xs text-gray-500 italic mt-1 line-clamp-1">
                                     {{ $product->description }}
                                 </p>
                             </div>
                         </div>
 
-                        <!-- Row 3: Ratings & Add to Bag Button -->
+                        <!-- Row 3: Ratings & Add to Cart Button -->
                         <div class="p-5 pt-3 flex items-center justify-between border-t border-gray-100">
-                            <!-- Star Ratings (5 stars) -->
                             <div class="flex items-center gap-0.5 text-amber-400 text-xs">
                                 <i class="fa-solid fa-star"></i>
                                 <i class="fa-solid fa-star"></i>
@@ -141,16 +142,23 @@
                                 <i class="fa-solid fa-star"></i>
                             </div>
 
-                            <!-- Add to Bag Form -->
-                            <form action="{{ route('buyer.addToCart') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" 
-                                        class="bg-[#f5ce42] hover:bg-[#e6c035] text-black font-semibold text-xs px-4 py-2 rounded-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-                                    <span>+ Add to Bag</span>
+                            @if(($product->productquantity ?? 0) > 0)
+                                <form action="{{ route('buyer.addToCart') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" 
+                                            class="bg-[#f5ce42] hover:bg-[#e6c035] text-black font-semibold text-xs px-4 py-2 rounded-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                                        <span>+ Add to Cart</span>
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" 
+                                        disabled 
+                                        class="bg-gray-200 text-gray-500 font-semibold text-xs px-4 py-2 rounded-sm cursor-not-allowed opacity-75">
+                                    Out of Stock
                                 </button>
-                            </form>
+                            @endif
                         </div>
 
                     </div>

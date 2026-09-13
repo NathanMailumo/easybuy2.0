@@ -13,8 +13,10 @@ class Products extends Model
         'productname',
         'description',
         'productprice',
-        'category_id',
+        'productquantity',
+        'is_available',
         'status',
+        'category_id',
     ];
     public function category()
     {

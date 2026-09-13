@@ -34,7 +34,7 @@
                     Browse Catalog &rarr;
                 </a>
                 <a href="{{ route('buyer.cart') }}" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white font-semibold text-xs rounded transition">
-                    View Bag
+                    View Cart 
                 </a>
             </div>
         </div>
@@ -47,8 +47,15 @@
                     <span>{{ session('success') }}</span>
                 </div>
                 <a href="{{ route('buyer.cart') }}" class="text-xs font-bold uppercase tracking-wider text-emerald-900 hover:underline">
-                    View Bag &rarr;
+                    View Cart  &rarr;
                 </a>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-8 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
+                <span class="text-sm font-medium">{{ session('error') }}</span>
             </div>
         @endif
 
@@ -126,15 +133,23 @@
                                     <i class="fa-solid fa-star"></i>
                                 </div>
 
-                                <form action="{{ route('buyer.addToCart') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" 
-                                            class="bg-[#f5ce42] hover:bg-[#e6c035] text-black font-semibold text-xs px-4 py-2 rounded-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-                                        <span>+ Add to Bag</span>
+                                @if(($product->productquantity ?? 0) > 0)
+                                    <form action="{{ route('buyer.addToCart') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" 
+                                                class="bg-[#f5ce42] hover:bg-[#e6c035] text-black font-semibold text-xs px-4 py-2 rounded-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                                            <span>+ Add to Cart</span>
+                                        </button>
+                                    </form>
+                                @else
+                                    <button type="button" 
+                                            disabled 
+                                            class="bg-gray-200 text-gray-500 font-semibold text-xs px-4 py-2 rounded-sm cursor-not-allowed opacity-75">
+                                        Out of Stock
                                     </button>
-                                </form>
+                                @endif
                             </div>
                         </div>
                     @endforeach

@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use App\Models\cart;
+use App\Models\Products;
+use App\Models\Order;
+use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -14,10 +18,6 @@ class PaymentController extends Controller
         return view('pay.index');
     }
 
-    // public function make_payment()
-    // {
-
-    // }
     public function initialize_payment(Request $request)
     {
         $validated = $request->validate([
@@ -123,31 +123,84 @@ class PaymentController extends Controller
                 ->withErrors(['payment' => 'The verified payment amount does not match the current cart total.']);
         }
 
-        $orderItems = $cartItems->map(function ($item) {
-            return [
-                'productname' => $item->products->productname,
-                'description' => $item->products->description,
-                'unit_price' => $item->products->productprice ?? 0,
-                'quantity' => $item->quantity,
-            ];
-        })->values()->all();
 
+        // $orderItems = $cartItems->map(function ($item) {
+        //     return [
+        //         'productname' => $item->products->productname,
+        //         'description' => $item->products->description,
+        //         'unit_price' => $item->products->productprice ?? 0,
+        //         'quantity' => $item->quantity,
+        //     ];
+        // })->values()->all();
+
+        // session()->put('completed_payment', [
+        //     'reference' => $reference,
+        //     'cart_items' => $orderItems,
+        //     'subtotal' => $total,
+        //     'total' => $total,
+        //     'payment_method' => 'Paystack',
+        //     'customer_name' => trim(($transaction['metadata']['first_name'] ?? '') . ' ' . ($transaction['metadata']['last_name'] ?? '')),
+        //     'phone_number' => $transaction['metadata']['phone_number'] ?? null,
+        //     'shipping_address' => $transaction['metadata']['shipping_address'] ?? null,
+        //     'delivery_city' => $transaction['metadata']['delivery_city'] ?? null,
+        //     'delivery_state' => $transaction['metadata']['delivery_state'] ?? null,
+        //     'country' => $transaction['metadata']['country'] ?? 'Nigeria',
+        //     'paid_at' => now()->toDateTimeString(),
+        // ]);
+        DB::transaction(function () use ($transaction, $cartItems, $total, $reference) {
+            // 1. Create the Order
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'order_number' => $reference,
+                'total_amount' => $total,
+                // 'paymentstatus' => 'paid',
+                'payment_method' => 'paystack',
+                'payment_status' => 'paid',
+                'shipping_address' => $transaction['metadata']['shipping_address'] ?? 'N/A',
+            ]);
+
+            // 2. Loop through cart items: Create OrderItems and reduce product stock
+            foreach ($cartItems as $item) {
+                // Ensure seller_id handles both seller_id and user_id columns on Products table
+                $sellerId = $item->products->seller_id ?? $item->products->user_id ?? null;
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                    'seller_id' => $sellerId,
+                    'quantity' => $item->quantity,
+                    'price' => $item->products->productprice ?? 0,
+                ]);
+
+                // Decrement inventory stock
+                $product = Products::lockForUpdate()->find($item->product_id);
+                if ($product) {
+                    $product->decrement('productquantity', $item->quantity);
+
+                    // Deactivate if quantity hits 0
+                    if ($product->fresh()->productquantity <= 0) {
+                        $product->update([
+                            'productquantity' => 0,
+                            'is_available' => false,
+                        ]);
+                    }
+                }
+            }
+
+            // 3. Clear cart
+            cart::where('buyer_id', Auth::id())->delete();
+        });
+
+        // Store session summary for UI receipt view
         session()->put('completed_payment', [
             'reference' => $reference,
-            'cart_items' => $orderItems,
             'subtotal' => $total,
             'total' => $total,
             'payment_method' => 'Paystack',
             'customer_name' => trim(($transaction['metadata']['first_name'] ?? '') . ' ' . ($transaction['metadata']['last_name'] ?? '')),
-            'phone_number' => $transaction['metadata']['phone_number'] ?? null,
             'shipping_address' => $transaction['metadata']['shipping_address'] ?? null,
-            'delivery_city' => $transaction['metadata']['delivery_city'] ?? null,
-            'delivery_state' => $transaction['metadata']['delivery_state'] ?? null,
-            'country' => $transaction['metadata']['country'] ?? 'Nigeria',
             'paid_at' => now()->toDateTimeString(),
         ]);
-
-        cart::where('buyer_id', Auth::id())->delete();
 
         return redirect()->route('buyer.order')->with('success', 'Payment confirmed successfully.');
     }
