@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
+    public function show($id)
+    {
+        $product = Products::with('category')->findOrFail($id);
+        $catalogImages = [
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80',
+        ];
+
+        // Pick a deterministic fallback image based on product ID
+        $fallbackImage = $catalogImages[$product->id % count($catalogImages)];
+
+        return view('buyer.show', compact('product', 'fallbackImage'));
+    }
+
     public function sellerdash()
     {
         if (!Auth::check()) {

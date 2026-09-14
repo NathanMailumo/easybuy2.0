@@ -17,7 +17,8 @@ class BuyerController extends Controller
         return view('buyer.buyerdash', compact('products'));
     }
 
-    public function viewproducts(){
+    public function viewproducts()
+    {
         $products = Products::where('status', 'approved')->latest()->get();
         return view('buyer.products', compact('products'));
     }
@@ -38,12 +39,14 @@ class BuyerController extends Controller
         return view('buyer.buyercategorydash', compact('categories', 'selectedCategory', 'products'));
     }
 
-    public function showCart(){
+    public function showCart()
+    {
         $cartItems = cart::where('buyer_id', Auth::id())->with('products.category')->get();
         return view('buyer.cart', compact('cartItems'));
     }
 
-    public function addToCart(Request $request){
+    public function addToCart(Request $request)
+    {
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1'
@@ -59,8 +62,8 @@ class BuyerController extends Controller
         $buyer = Auth::user();
 
         $cartItem = cart::where('buyer_id', $buyer->id)
-                        ->where('product_id', $product->id)
-                        ->first();
+            ->where('product_id', $product->id)
+            ->first();
 
         if ($cartItem) {
             $cartItem->quantity += $request->quantity;
@@ -87,8 +90,8 @@ class BuyerController extends Controller
         ]);
 
         $cartItem = cart::where('id', $cartId)
-                        ->where('buyer_id', Auth::id())
-                        ->firstOrFail();
+            ->where('buyer_id', Auth::id())
+            ->firstOrFail();
 
         $cartItem->quantity = $request->quantity;
         $cartItem->save();
@@ -101,8 +104,8 @@ class BuyerController extends Controller
         $cartId = $request->cart_id ?? $request->cart_item_id;
 
         $cartItem = cart::where('id', $cartId)
-                        ->where('buyer_id', Auth::id())
-                        ->firstOrFail();
+            ->where('buyer_id', Auth::id())
+            ->firstOrFail();
 
         $cartItem->delete();
 
@@ -131,11 +134,17 @@ class BuyerController extends Controller
         $cartItems = cart::where('buyer_id', Auth::id())->with('products.category')->get();
 
         $subtotal = 0;
+
+        $shippingFee = 2500;
+        $vatRate = 0.075;
+
         foreach ($cartItems as $item) {
             $subtotal += ($item->products->productprice ?? 0) * $item->quantity;
         }
-        $total = $subtotal;
 
-        return view('buyer.checkout', compact('cartItems', 'subtotal', 'total'));
+        $vat = $subtotal * $vatRate;
+        $total = $subtotal + $shippingFee + $vat;
+
+        return view('buyer.checkout', compact('cartItems', 'subtotal', 'total', 'vat', 'shippingFee'));
     }
 }

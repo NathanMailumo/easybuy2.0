@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Products;
+use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
@@ -12,8 +13,12 @@ class AdminController extends Controller
     public function showAdmin()
     {
         $productCount = Products::count();
-        $revenue = Products::sum('productprice');
         $userCount = User::count();
+
+        $commissionRate = 0.05;
+
+        $totalGrossSales = Order::where('payment_status', 'paid')->sum('total_amount');
+        $revenue = $totalGrossSales * $commissionRate;
 
         return view('admin.index', compact('productCount', 'userCount', 'revenue'));
     }
@@ -21,24 +26,24 @@ class AdminController extends Controller
     public function showAdminProduct()
     {
         $products = Products::where('status', 'waiting')
-        ->with('category')
-        ->latest()
-        ->get();
+            ->with('category')
+            ->latest()
+            ->get();
 
-    return view('admin.admin_product', compact('products'));
+        return view('admin.admin_product', compact('products'));
     }
 
     public function approveProduct(Products $product)
-{
-    $product->update(['status' => 'approved']);
+    {
+        $product->update(['status' => 'approved']);
 
-    return redirect()->back()->with('success', 'Product has been approved and published to the store.');
-}
+        return redirect()->back()->with('success', 'Product has been approved and published to the store.');
+    }
 
-public function rejectProduct(Products $product)
-{
-    $product->update(['status' => 'rejected']);
+    public function rejectProduct(Products $product)
+    {
+        $product->update(['status' => 'rejected']);
 
-    return redirect()->back()->with('success', 'Product has been rejected.');
-}
+        return redirect()->back()->with('success', 'Product has been rejected.');
+    }
 }
