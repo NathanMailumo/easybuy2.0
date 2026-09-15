@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Products;
 use App\Models\Category;
-use App\Models\cart;
+use App\Models\Cart;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 

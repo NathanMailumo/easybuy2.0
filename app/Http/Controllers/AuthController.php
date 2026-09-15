@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User as AuthModel;
-use App\Models\passwordReset;
+use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Admin;
 

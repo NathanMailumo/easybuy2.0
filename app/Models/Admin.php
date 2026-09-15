@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class admin extends Authenticatable
+class Admin extends Authenticatable
 {
     protected $table = 'admins';
 

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class buyer extends Model
+class Buyer extends Model
 {
     protected $table = 'buyers';
 
