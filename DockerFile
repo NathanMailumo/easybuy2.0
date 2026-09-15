@@ -36,6 +36,10 @@ COPY . /var/www
 WORKDIR /var/www
 RUN composer install --no-dev --optimize-autoloader
 
+# Make startup script executable
+RUN chmod +x /var/www/entrypoint.sh
+
 EXPOSE 8000
-# CMD ["php-fpm"]
-CMD php artisan serve --host=0.0.0.0 --port=8000
+
+# Launch via entrypoint
+CMD ["/bin/sh", "/var/www/entrypoint.sh"]
