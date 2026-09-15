@@ -28,6 +28,14 @@ COPY . /var/www
 # Set permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-EXPOSE 9000
+# Install Composer inside the container
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy project files and install dependencies
+COPY . /var/www
+WORKDIR /var/www
+RUN composer install --no-dev --optimize-autoloader
+
+EXPOSE 8000
 # CMD ["php-fpm"]
 CMD php artisan serve --host=0.0.0.0 --port=8000
