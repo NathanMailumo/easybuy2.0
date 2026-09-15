@@ -32,7 +32,7 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:paystack',
         ]);
 
-        $cartItems = cart::where('buyer_id', Auth::id())
+        $cartItems = Cart::where('buyer_id', Auth::id())
             ->with('products')
             ->get();
 
@@ -110,7 +110,7 @@ class PaymentController extends Controller
                 ->withErrors(['payment' => 'This payment does not belong to the authenticated buyer.']);
         }
 
-        $cartItems = cart::where('buyer_id', Auth::id())
+        $cartItems = Cart::where('buyer_id', Auth::id())
             ->with('products')
             ->get();
 
@@ -188,7 +188,7 @@ class PaymentController extends Controller
             }
 
             // 3. Clear cart
-            cart::where('buyer_id', Auth::id())->delete();
+            Cart::where('buyer_id', Auth::id())->delete();
         });
 
         // Store session summary for UI receipt view

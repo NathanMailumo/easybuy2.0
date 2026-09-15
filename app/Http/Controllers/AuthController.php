@@ -86,7 +86,7 @@ class AuthController extends Controller
         $code = random_int(100000, 999999);
 
         // Store or update the reset code record
-        passwordReset::updateOrCreate(
+        PasswordReset::updateOrCreate(
             ['email' => $validateEmail['email']],
             [
                 'code' => $code,
@@ -114,7 +114,7 @@ class AuthController extends Controller
             'code' => 'required|digits:6',
         ]);
 
-        $records = passwordReset::where('email', $request->email)
+        $records = PasswordReset::where('email', $request->email)
             ->where('code', $request->code)
             ->first();
 

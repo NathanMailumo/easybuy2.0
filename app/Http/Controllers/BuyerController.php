@@ -41,7 +41,7 @@ class BuyerController extends Controller
 
     public function showCart()
     {
-        $cartItems = cart::where('buyer_id', Auth::id())->with('products.category')->get();
+        $cartItems = Cart::where('buyer_id', Auth::id())->with('products.category')->get();
         return view('buyer.cart', compact('cartItems'));
     }
 
@@ -61,7 +61,7 @@ class BuyerController extends Controller
 
         $buyer = Auth::user();
 
-        $cartItem = cart::where('buyer_id', $buyer->id)
+        $cartItem = Cart::where('buyer_id', $buyer->id)
             ->where('product_id', $product->id)
             ->first();
 
@@ -69,7 +69,7 @@ class BuyerController extends Controller
             $cartItem->quantity += $request->quantity;
             $cartItem->save();
         } else {
-            cart::create([
+            Cart::create([
                 'buyer_id' => $buyer->id,
                 'product_id' => $product->id,
                 'quantity' => $request->quantity,
@@ -89,7 +89,7 @@ class BuyerController extends Controller
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cartItem = cart::where('id', $cartId)
+        $cartItem = Cart::where('id', $cartId)
             ->where('buyer_id', Auth::id())
             ->firstOrFail();
 
@@ -103,7 +103,7 @@ class BuyerController extends Controller
     {
         $cartId = $request->cart_id ?? $request->cart_item_id;
 
-        $cartItem = cart::where('id', $cartId)
+        $cartItem = Cart::where('id', $cartId)
             ->where('buyer_id', Auth::id())
             ->firstOrFail();
 
@@ -131,7 +131,7 @@ class BuyerController extends Controller
 
     public function showCheckout()
     {
-        $cartItems = cart::where('buyer_id', Auth::id())->with('products.category')->get();
+        $cartItems = Cart::where('buyer_id', Auth::id())->with('products.category')->get();
 
         $subtotal = 0;
 
